@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+    }
+}
+
+group 'analytics.tech.kfc'
+version '1.0'
+
+apply plugin: 'com.moowork.node'
+apply plugin: 'java-library'
+
+buildDir = 'dist'
+
+node {
+    version = '9.3.0'
+    npmVersion = '5.5.1'
+    download = true
+}
+
+jar {
+    dependsOn 'yarn_build'
+
+    from(fileTree('build')) {
+        into 'META-INF/resources'
+    }
+}
+
+clean {
+    delete 'dist'
+    delete 'build'
+}

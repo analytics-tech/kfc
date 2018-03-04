@@ -1,0 +1,30 @@
+
+group 'analytics.tech.kfc'
+version '1.0'
+
+apply plugin: 'org.springframework.boot'
+
+configurations {
+    buildOnly
+}
+
+jar {
+    from {
+        configurations.buildOnly.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+dependencies {
+    buildOnly project(':toolkit-web')
+
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
+
+    // enable the use zuul as reverse proxy for call out to various micro-services
+    compile('org.springframework.cloud:spring-cloud-starter-netflix-zuul')
+
+    runtime('org.springframework.boot:spring-boot-devtools')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+

@@ -1,0 +1,134 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+buildscript {
+
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenLocal()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${project.'kotlin.version'}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${project.'kotlin.version'}")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${project.'spring.boot.version'}")
+        classpath("org.junit.platform:junit-platform-gradle-plugin:${project.'junit.plugin.version'}")
+
+    }
+}
+
+group 'analytics.tech.kfc'
+version '1.0'
+
+subprojects {
+
+    if (it.name != 'toolkit-web') {
+
+        apply plugin: 'kotlin'
+        apply plugin: 'kotlin-spring'
+        apply plugin: 'org.junit.platform.gradle.plugin'
+
+        repositories {
+            jcenter()
+            mavenLocal()
+        }
+
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+
+        compileKotlin {
+            kotlinOptions {
+                freeCompilerArgs = ["-Xjsr305=strict"]
+                jvmTarget = "1.8"
+            }
+        }
+        compileTestKotlin {
+            kotlinOptions {
+                freeCompilerArgs = ["-Xjsr305=strict"]
+                jvmTarget = "1.8"
+            }
+        }
+
+        compileTestJava {
+            sourceCompatibility = 1.8
+            targetCompatibility = 1.8
+            options.compilerArgs += '-parameters'
+        }
+
+        junitPlatform {
+            filters {
+                engines {
+                    include 'spek'
+                    include 'junit-jupiter', 'junit-vintage'
+                }
+                tags {
+                    exclude 'slow'
+                }
+            }
+        }
+
+
+        plugins.withType(SpringBootPlugin).whenPluginAdded {
+            springBoot {
+                buildInfo {
+                    def infoProps = [
+                            'name'    : shortName(project.name),
+                            'artifact': project.name
+                    ]
+                    if (project.description != null) {
+                        infoProps.put('description', project.description)
+                    }
+                    additionalProperties = infoProps
+                }
+            }
+
+            dependencyManagement {
+                imports {
+                    mavenBom "org.springframework.cloud:spring-cloud-dependencies:${project.'spring.cloud.version'}"
+                }
+            }
+        }
+
+        jar {
+            baseName = shortName(project.name)
+        }
+
+        dependencies {
+
+            compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+            compile("org.jetbrains.kotlin:kotlin-reflect")
+
+            // spek if wanted
+            testCompile('org.jetbrains.spek:spek-api:1.1.5') {
+                exclude group: 'org.jetbrains.kotlin'
+            }
+            testRuntime('org.jetbrains.spek:spek-junit-platform-engine:1.1.5') {
+                exclude group: 'org.junit.platform'
+                exclude group: 'org.jetbrains.kotlin'
+            }
+
+            // junit 5
+            testCompile("org.junit.jupiter:junit-jupiter-api:${project.'junit.jupiter.version'}")
+            testRuntime("org.junit.jupiter:junit-jupiter-engine:${project.'junit.jupiter.version'}")
+
+            // junit 4
+            testCompile("junit:junit:${project.'junit.v4.version'}")
+            testRuntime("org.junit.vintage:junit-vintage-engine:${project.'junit.jupiter.version'}")
+
+            // kotlin test
+            testCompile("org.jetbrains.kotlin:kotlin-test")
+            testCompile("org.jetbrains.kotlin:kotlin-test-junit")
+        }
+    }
+}
+
+task wrapper(type: Wrapper, description: "Update the Gradle wrapper") {
+    gradleVersion = project."gradle.version"
+}
+
+def static final shortName(String name) {
+    if(name.lastIndexOf('.') != -1 &&
+            name.length() > name.lastIndexOf('.') + 2) {
+        return name.substring(name.lastIndexOf('.') + 1)
+    }
+    return name
+}

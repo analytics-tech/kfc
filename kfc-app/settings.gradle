@@ -1,0 +1,5 @@
+rootProject.name = 'kfc-app'
+include 'toolkit-web'
+include 'toolkit-backend'
+include 'time-service'
+
