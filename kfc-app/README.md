@@ -17,6 +17,10 @@ During development, to start the apps, run the command below at the root project
 Once started, the app can be accessed via [http://localhost:3000](http://localhost:3000)
 
 ```
+
+# About gradlew, if you are using Windows, use gradlew.bat instead. 
+# In linux, you might need to run 'chmod +x gradlew' to make it executable
+
 # start the api backend first
 ./gradlew :toolkit-backend:bootRun
 
@@ -24,14 +28,25 @@ Once started, the app can be accessed via [http://localhost:3000](http://localho
 ./gradlew :time-service:bootRun
 
 # start web frontend
+# if you have yarn installed (preferred)
 cd toolkit-web
+
+# run just yarn to download all needed npm packages
+yarn
+
+# start webpack and up server
 yarn start
+
+# if you do not have yarn installed (at root project directory)
+./gradlew :toolkit-web:yarn
+./gradlew :toolkit-web:yarn_start
 ``` 
 
 For production build, run the command below at the root project directory.
 Note that static code analysis and linting will be checked during the build. 
 Build will fail if any non-compliance is found. 
 ```
+./gradlew :toolkit-web:build
 ./gradlew build
 ```
 
